@@ -1,0 +1,48 @@
+<h1>Filtro de Sentenças Descritoras</h1>
+{% if request.user.is_authenticated %}
+<p> você está logado como {{ request.user.username }} | <a href="{% url 'logout' %}">Sair </a></p>
+{% else %}
+<p><a href="{% url 'login' %}">Acessar o sistema</a></p>
+{% endif %}
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="#" method="get">
+<select name="fonte_filtro">
+ <option value="origem">Origem da sentença</option>
+ <option value="sentenca_descritora">Sentença Descritora</option>
+ <option value="1">Elemento do Texto</option>
+ <option value="2">Objetivo de Aprendizagem</option>
+ <option value="3">Tipo de Gênero</option>
+</select>
+<input type="text" name="texto_filtro" />
+<input type="submit" value="filtrar" />
+</form>
+
+{% if ordered_sentdesc_list %}
+    <table>
+		<tr>
+			<th>Sequêncial</th>
+			<th>Origem</th>
+			<th>Sentença Descritora</th>
+	{% for atributo in total_atributos %}
+		<th>{{ atributo.atributo }}</th>
+	{% endfor %}
+		<th>&nbsp;</th>
+		</tr>
+	{% for habilidade in total_habilidades %}
+		<tr>
+			<td>{{ habilidade.id }}</td>
+			<td>{{ habilidade.origem }}</td>
+			<td>{{ habilidade.sent_desc }}</td>
+		{% for sentdesc in ordered_sentdesc_list %}
+			{% if habilidade.id == sentdesc.habilidades.id %}
+				<td>{{ sentdesc.valor }}</td>			
+			{% endif %}
+		{% endfor %}
+			<td><a href="{% url 'sentdesc:detalhe' habilidade.id %}">Editar</a></td>
+		</tr>
+	{% endfor %}
+	</table>
+{% else %}
+    <p>No polls are available.</p>
+{% endif %}

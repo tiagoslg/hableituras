@@ -1,0 +1,15 @@
+<h1>Editar Sentença Descritora</h1>
+
+{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+<form action="{% url 'sentdesc:atualizar' sent_desc.id %}" method="post">
+{% csrf_token %}
+<input type="hidden" name="sent_desc_id" value='{{ sent_desc.id }}' />
+Sentença Descritora: <textarea name="sent_desc" />{{ sent_desc.sent_desc}}</textarea><br />
+Origem: <input type="text" name="origem" value='{{ sent_desc.origem }}' /><br />
+ID Origem: <input type="text" name="id_origem" value='{{ sent_desc.id_origem }}' /><br />
+{% for atributo in atributos %}
+	{{ atributo.atributo }}: <input type="text" name='atributo{{ atributo.id }}' value='{{ atributo.valor }}' /><br />
+{% endfor %}
+<input type="submit" value="Atualizar" />
+</form>
