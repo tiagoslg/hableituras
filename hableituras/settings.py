@@ -77,18 +77,18 @@ WSGI_APPLICATION = 'hableituras.wsgi.application'
 
 DATABASES = {
     'default': {
-        #'ENGINE': 'django.db.backends.sqlite3',
-		'ENGINE': 'mysql.connector.django',
-        #'NAME':  os.path.join(BASE_DIR, 'db.sqlite3'),
-		'NAME':  'hableituras',
+        'ENGINE': 'django.db.backends.sqlite3',
+		#'ENGINE': 'mysql.connector.django',
+        'NAME':  os.path.join(BASE_DIR, 'db.sqlite3'),
+		#'NAME':  'hableituras',
 		#'HOST': '127.0.0.1',
-		'USER': 'root', 
-		'PASSWORD': 'lalalala', 
+		#'USER': 'root', 
+		#'PASSWORD': 'lalalala', 
 		#'PORT': '3306',
 		#'HOST': 'localhost',
-		'OPTIONS': {
-          'autocommit': True,
-        },
+		#'OPTIONS': {
+        #  'autocommit': True,
+        #},
     }
 }
 
