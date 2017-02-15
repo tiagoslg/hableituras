@@ -4,6 +4,7 @@ from django.views import generic
 from django_pandas.io import read_frame
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 from .models import Habilidades_Leitura, Atributos, Atributos_Habilidades
 from .forms import NameForm
@@ -16,6 +17,7 @@ def index(request):
 	else:
 		print('Não Autenticado')
 	if request.GET.get('fonte_filtro') and request.GET.get('texto_filtro'):
+		link_filtro = 'fonte_filtro=' + request.GET.get('fonte_filtro') + '&texto_filtro=' + request.GET.get('texto_filtro')
 		if request.GET.get('fonte_filtro') == 'origem':
 			ordered_sentdesc_list = Atributos_Habilidades.objects.select_related('habilidades').filter(habilidades__origem__icontains=request.GET.get('texto_filtro'))
 			total_habilidades = Habilidades_Leitura.objects.all().filter(origem__icontains=request.GET.get('texto_filtro'))
@@ -34,8 +36,22 @@ def index(request):
 		ordered_sentdesc_list = Atributos_Habilidades.objects.select_related('habilidades')
 		total_habilidades = Habilidades_Leitura.objects.all()
 		total_atributos = Atributos.objects.all()
-
-	context = {'ordered_sentdesc_list': ordered_sentdesc_list, 'total_habilidades': total_habilidades, 'total_atributos': total_atributos}
+		link_filtro = ''
+	
+	page = request.GET.get('page', 1)
+	paginator = Paginator(total_habilidades, 50)
+	try:
+		total_habilidades = paginator.page(page)
+	except PageNotAnInteger:
+		total_habilidades = paginator.page(1)
+	except EmptyPage:
+		total_habilidades = paginator.page(paginator.num_pages)
+	context = {
+		'ordered_sentdesc_list': ordered_sentdesc_list, 
+		'total_habilidades': total_habilidades, 
+		'total_atributos': total_atributos,
+		'link_filtro': link_filtro,
+		}
 	return render(request, 'sentdesc/index.html', context)
 
 @login_required()

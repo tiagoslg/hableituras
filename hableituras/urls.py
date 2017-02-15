@@ -18,8 +18,7 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
-    url(r'^polls/', include('polls.urls', namespace='polls')),
-	url(r'^sentdesc/', include('sentdesc.urls', namespace='sentdesc')),
+    url(r'^sentdesc/', include('sentdesc.urls', namespace='sentdesc')),
 	url(r'^admin/', admin.site.urls),
 	url(r'^accounts/login/$', auth_views.login, {'template_name': 'registration/login.html'}, name='login'),
 	url(r'^accounts/logout/$', auth_views.logout, {'next_page': 'sentdesc:index'}, name='logout'),

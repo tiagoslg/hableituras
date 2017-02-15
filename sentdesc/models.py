@@ -14,8 +14,22 @@ class Habilidades_Leitura(models.Model):
 	objects = DataFrameManager()
 	
 class Atributos(models.Model):
+	TXT = 'TXT'
+	NBR = 'NBR'
+	LTXT = 'LTXT'
+	DT = 'DT'
+	TIPO_CHOICES = (
+        (TXT, 'Texto'),
+        (NBR, 'Número'),
+        (LTXT, 'Texto Grande'),
+        (DT, 'Data'),
+	)
 	atributo = models.CharField(max_length=200)
-	tipo = models.CharField(max_length=20)
+	tipo = models.CharField(
+		max_length=4,
+		choices=TIPO_CHOICES,
+		default=TXT,
+	)
 	detalhamento = models.TextField()
 	def __str__(self):
 		return self.atributo

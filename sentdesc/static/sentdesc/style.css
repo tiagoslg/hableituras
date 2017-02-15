@@ -1,0 +1,162 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-size: 14px;
+    font-family: Verdana,Arial,sans-serif;
+    color: #333;
+    background: #fff;
+}
+
+a:link, a:visited {
+	color: #3f60a8;
+}
+
+ul li {
+    list-style: none; /* Remove list bullets */
+    padding: 0;
+    margin: 0;
+	display: inline-block;
+}
+
+ul li a {
+	text-decoration: none;
+	border-bottom: 1px dotted #417690;
+}
+
+.active {
+    background-color: #417690;
+    color: white;
+}
+
+.sr-only {
+	display: none;
+}
+
+#container {
+    position: relative;
+    width: 100%;
+    min-width: 980px;
+    padding: 0;
+}
+
+#header {
+    width: auto;
+    height: 40px;
+    padding: 10px 40px;
+    background: #417690;
+    line-height: 40px;
+    color: #ffc;
+    overflow: hidden;
+}
+
+#branding {
+    float: left;
+}
+
+#branding h1 {
+    padding: 0;
+    margin: 0 20px 0 0;
+    font-weight: 300;
+    font-size: 24px;
+    color: #f5dd5d;
+}
+
+#branding h1, #branding h1 a:link, #branding h1 a:visited {
+    color: #f5dd5d;
+}
+#user-tools {
+    float: right;
+    padding: 0;
+    margin: 0 0 0 20px;
+    font-weight: 300;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    text-align: right;
+}
+
+#user-tools a:link, #user-tools a:visited {
+    color: #f5dd5d;
+}
+
+#content {
+    padding: 20px 40px;
+}
+
+#content table, th, td{
+	border: 1px dotted gray;
+	border-collapse: collapse;
+}
+#content th {
+	font-size: 12px;
+	font-weight: bold;
+	margin: 0;
+    padding: 5;
+}
+#content td {
+	font-size: 12px;
+	margin: 0;
+    padding: 3;
+}
+
+fieldset {
+    margin: 0;
+    padding: 0;
+    border: none;
+    border-top: 1px solid #eee;
+}
+
+.module {
+    border: none;
+    margin-bottom: 30px;
+    background: #fff;
+}
+
+.form-row {
+    overflow: hidden;
+    padding: 10px;
+    font-size: 13px;
+    border-bottom: 1px solid #eee;
+}
+.required label, label.required {
+    font-weight: bold;
+    color: #333;
+}
+
+.aligned label {
+    display: block;
+    padding: 4px 10px 0 0;
+    float: left;
+    width: 160px;
+    word-wrap: break-word;
+    line-height: 1;
+}
+
+.related-widget-wrapper {
+    float: left;
+    overflow: hidden;
+}
+
+input[type=text], input[type=password], input[type=email], input[type=url], input[type=number], textarea, select, .vTextField {
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px 6px;
+    margin-top: 0;
+}
+
+input, textarea, select, .form-row p, form .button {
+    margin: 2px 0;
+    padding: 2px 3px;
+    vertical-align: middle;
+    font-family: Verdana, Arial, sans-serif;
+    font-weight: normal;
+    font-size: 13px;
+}
+
+textarea {
+    vertical-align: top;
+}
+
+.colM .aligned .vLargeTextField, .colM .aligned .vXMLLargeTextField {
+    width: 610px;
+}

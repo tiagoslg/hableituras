@@ -1,15 +1,80 @@
-<h1>Editar Sentença Descritora</h1>
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'sentdesc/style.css' %}" />
 
-{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-
-<form action="{% url 'sentdesc:atualizar' sent_desc.id %}" method="post">
-{% csrf_token %}
-<input type="hidden" name="sent_desc_id" value='{{ sent_desc.id }}' />
-Sentença Descritora: <textarea name="sent_desc" />{{ sent_desc.sent_desc}}</textarea><br />
-Origem: <input type="text" name="origem" value='{{ sent_desc.origem }}' /><br />
-ID Origem: <input type="text" name="id_origem" value='{{ sent_desc.id_origem }}' /><br />
-{% for atributo in atributos %}
-	{{ atributo.atributo }}: <input type="text" name='atributo{{ atributo.id }}' value='{{ atributo.valor }}' /><br />
-{% endfor %}
-<input type="submit" value="Atualizar" />
-</form>
+<div id="container">
+	<div id="header">
+		<div id="branding"><h1>Editar Sentença Descritora</h1>
+			{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+		</div>
+		<div id="user-tools"
+		{% if request.user.is_authenticated %}
+		<p> você está logado como {{ request.user.username }} | <a href="{% url 'logout' %}">Sair </a></p>
+		{% else %}
+		<p><a href="{% url 'login' %}">Acessar o sistema</a></p>
+		{% endif %}
+		</div>
+	</div>
+	<div id="content">
+		<div>
+		<form action="{% url 'sentdesc:atualizar' sent_desc.id %}" method="post">
+			{% csrf_token %}
+			<input type="hidden" name="sent_desc_id" value='{{ sent_desc.id }}' />
+			<fieldset class="module aligned ">
+				<div class="form-row">
+					<div>
+						<label class="required" for="sent_desc">
+						Sentença Descritora:
+						</label>
+					</div>
+					<div class="related-widget-wrapper">
+					<textarea id="sent_desc" name="sent_desc" class="vLargeTextField" cols="40" rows="5" required>{{ sent_desc.sent_desc }}</textarea>
+					</div>
+				</div>
+				<div class="form-row">
+					<div>
+						<label class="required" for="origem">
+						Origem:
+						</label>
+					</div>
+					<div class="related-widget-wrapper">
+					<input type="text" id="origem" name="origem" value='{{ sent_desc.origem }}' required />
+					</div>
+				</div>
+				<div class="form-row">
+					<div>
+						<label class="required" for="id_origem">
+						ID Origem:
+						</label>
+					</div>
+					<div class="related-widget-wrapper">
+					<input type="text" id="id_origem" name="id_origem" value='{{ sent_desc.id_origem }}' required />
+					</div>
+				</div>	
+				{% for atributo in atributos %}
+					<div class="form-row">
+					<div>
+						<label class="required" for='atributo{{ atributo.id }}'>
+						{{ atributo.atributo }}:
+						</label>
+					</div>
+					<div class="related-widget-wrapper">
+						{% if atributo.atributo.tipo == "TXT" %}
+							<input type="text" id='atributo{{ atributo.id }}' name='atributo{{ atributo.id }}' value='{{ atributo.valor }}' required />
+						{% elif atributo.atributo.tipo == "NBR" %}
+							<input type="number" id='atributo{{ atributo.id }}' name='atributo{{ atributo.id }}' value='{{ atributo.valor }}' required />
+						{% elif atributo.atributo.tipo == "DT" %}
+							<input type="date" id='atributo{{ atributo.id }}' name='atributo{{ atributo.id }}' value='{{ atributo.valor }}' required />
+						{% elif atributo.atributo.tipo == "LTXT" %}
+							<textarea id='atributo{{ atributo.id }}' name='atributo{{ atributo.id }}' class="vLargeTextField" cols="40" rows="5" required>{{ atributo.valor }}</textarea>
+						{% endif %}
+					</div>
+					</div>
+				{% endfor %}
+			</fieldset>
+			<div class="submit-row">
+				<input type="submit" value="Atualizar" />
+			</div>			
+		</form>
+		</div>
+	</div>
+</div>
