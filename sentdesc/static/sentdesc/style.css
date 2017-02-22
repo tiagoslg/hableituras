@@ -63,6 +63,7 @@ ul li a {
 
 #branding h1, #branding h1 a:link, #branding h1 a:visited {
     color: #f5dd5d;
+	text-decoration: none;
 }
 #user-tools {
     float: right;
@@ -97,6 +98,27 @@ ul li a {
 	font-size: 12px;
 	margin: 0;
     padding: 3;
+}
+
+#form-conteudo {
+	position: absolute;
+	width:80%; 
+	min-height:80%;
+    top: 60px;
+    left: 10%;
+    visibility: hidden;
+	-webkit-box-shadow: 10px 10px 12px -1px rgba(0,0,0,0.6);
+	-moz-box-shadow: 10px 10px 12px -1px rgba(0,0,0,0.6);
+	box-shadow: 10px 10px 12px -1px rgba(0,0,0,0.6);
+	/*background: #417690;*/
+	background-image: url("fundo.png");
+}
+
+#form-detalhe {
+	width: 90%;
+    min-height: 90%;
+    left: 50;
+    top: 50;
 }
 
 fieldset {
@@ -157,6 +179,10 @@ textarea {
     vertical-align: top;
 }
 
-.colM .aligned .vLargeTextField, .colM .aligned .vXMLLargeTextField {
+.aligned {
+	width: 100%
+}
+
+.colM .vLargeTextField, .colM .aligned .vXMLLargeTextField {
     width: 610px;
 }

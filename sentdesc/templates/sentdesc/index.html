@@ -1,10 +1,23 @@
 {% load static %}
 <link rel="stylesheet" type="text/css" href="{% static 'sentdesc/style.css' %}" />
+<script src="{% static 'sentdesc/jquery-3.1.1.min.js' %}" type="text/javascript"></script>
+<script type='text/javascript'>
+$(document).ready(function(){
+// Define as variaveis de acordo com a quantidade da página // opcional.
+	
+	$(document).on('click', '.botaoEditar', function(){
+        var detalhe = $(this).data('editar');
+        $('#form-detalhe').load(detalhe);
+		$('#form-conteudo').css("visibility", "visible");
+    });
+
+});
+</script>
 
 <div id="container">
 	<div id="header">
 		<div id="branding">
-		<h1>Filtro de Sentenças Descritoras</h1>
+		<h1><a href="{% url 'sentdesc:index' %}">Filtro de Sentenças Descritoras</a></h1>
 		</div>
 		<div id="user-tools"
 		{% if request.user.is_authenticated %}
@@ -50,7 +63,9 @@
 						<td>{{ sentdesc.valor }}</td>			
 					{% endif %}
 				{% endfor %}
-					<td><a href="{% url 'sentdesc:detalhe' habilidade.id %}">Editar</a></td>
+					<td>
+					<button type="button" data-editar="{% url 'sentdesc:detalhe' habilidade.id %}" class="botaoEditar">Editar</button>
+					</td>
 				</tr>
 			{% endfor %}
 			</table>
@@ -79,5 +94,10 @@
 		{% else %}
 			<p>Nenhuma Sentença Descritora equivale ao filtro selecionado.</p>
 		{% endif %}
+	</div>
+	<div id="form-conteudo">
+		<div id="form-detalhe">
+		content
+		</div>
 	</div>
 </div>

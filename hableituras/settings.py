@@ -25,7 +25,7 @@ SECRET_KEY = 'kl_@z0h!$s5^b_e*p*u7ntsp_ihnn4+7ywn3&@t7-e0_dr1kyn'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['tiagoslg.pythonanywhere.com']
+ALLOWED_HOSTS = ['localhost', 'tiagoslg.pythonanywhere.com']
 
 
 # Application definition

@@ -6,16 +6,12 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
-from .models import Habilidades_Leitura, Atributos, Atributos_Habilidades
+from .models import Habilidades_Leitura, Atributos, Atributos_Habilidades, Elementos_Texto
 from .forms import NameForm
 
 # Create your views here.
 
 def index(request):
-	if request.user.is_authenticated():
-		print('Autenticado')
-	else:
-		print('Não Autenticado')
 	if request.GET.get('fonte_filtro') and request.GET.get('texto_filtro'):
 		link_filtro = 'fonte_filtro=' + request.GET.get('fonte_filtro') + '&texto_filtro=' + request.GET.get('texto_filtro')
 		if request.GET.get('fonte_filtro') == 'origem':
@@ -25,7 +21,7 @@ def index(request):
 			ordered_sentdesc_list = Atributos_Habilidades.objects.select_related('habilidades').filter(habilidades__sent_desc__icontains=request.GET.get('texto_filtro'))
 			total_habilidades = Habilidades_Leitura.objects.all().filter(sent_desc__icontains=request.GET.get('texto_filtro'))
 		else:
-			ordered_sentdesc_list = list(Atributos_Habilidades.objects.all().filter(atributo=request.GET.get('fonte_filtro'), valor=request.GET.get('texto_filtro')))
+			ordered_sentdesc_list = list(Atributos_Habilidades.objects.all().filter(atributo=request.GET.get('fonte_filtro'), valor__icontains=request.GET.get('texto_filtro')))
 			list_hab_id = [ item_list.habilidades.id for item_list in ordered_sentdesc_list]
 			ordered_sentdesc_list = Atributos_Habilidades.objects.select_related('habilidades').filter(habilidades__id__in=list_hab_id)
 			total_habilidades = Habilidades_Leitura.objects.all().filter(id__in=list_hab_id)
@@ -58,7 +54,18 @@ def index(request):
 def detalhe(request, sent_desc_id):
 	sent_desc = get_object_or_404(Habilidades_Leitura, pk=sent_desc_id)
 	atributos = Atributos_Habilidades.objects.select_related('atributo').filter(habilidades=sent_desc_id)
-	context = {'sent_desc': sent_desc, 'atributos': atributos}
+	elementos_texto = Elementos_Texto.objects.all()
+	link_filtro = ' '
+	if request.GET.get('fonte_filtro') and request.GET.get('texto_filtro'):
+		link_filtro = 'fonte_filtro=' + request.GET.get('fonte_filtro') + '&texto_filtro=' + request.GET.get('texto_filtro')
+	if request.GET.get('page'):
+		link_filtro = 'page=' + request.GET.get('page') + '&' + link_filtro
+	context = {
+		'sent_desc': sent_desc, 
+		'atributos': atributos, 
+		'elementos_texto': elementos_texto,
+		'link_filtro': link_filtro,
+	}
 	return render(request, 'sentdesc/form_editar.html', context)
 
 @login_required()	
@@ -67,14 +74,11 @@ def atualizar(request, sent_desc_id):
 		habilidade = get_object_or_404(Habilidades_Leitura, pk=request.POST['sent_desc_id'])
 		atributos = Atributos_Habilidades.objects.select_related('atributo').filter(habilidades=request.POST['sent_desc_id'])
 		habilidade.sent_desc = request.POST['sent_desc']
-		habilidade.origem = request.POST['origem']
-		habilidade.id_origem = request.POST['id_origem']
 		habilidade.save()
 		for atributo in atributos:
 			atributo.valor = request.POST['atributo' + str(atributo.id)]
 			atributo.save()
 		context = {'error_message': 'Habilidade de Leitura atualizada com sucesso',}
-		error_message = 'Habilidade de Leitura atualizada com sucesso'
 		return HttpResponseRedirect(reverse('sentdesc:index'))
 		
 def login(request):

@@ -47,11 +47,7 @@
 </div>
 <div class="submit-row">
 <input type="submit" value="Entrar" />
-{% if next %}
-	<input type="hidden" name="next" value="{{ next }}" />
-{% else %}
-	<input type="hidden" name="next" value="{% url 'sentdesc:index' %}" />
-{% endif %}
+<input type="hidden" name="next" value="{% url 'sentdesc:index' %}" />
 </div>
 </form>
 

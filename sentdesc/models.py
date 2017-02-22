@@ -10,7 +10,9 @@ class Habilidades_Leitura(models.Model):
 	sent_desc = models.TextField('Sentença Descritora')
 	def __str__(self):
 		return self.sent_desc
-	
+	class Meta:
+		verbose_name = ("Habilidade de Leitura")
+		verbose_name_plural = ("Habilidades de Leitura")
 	objects = DataFrameManager()
 	
 class Atributos(models.Model):
@@ -18,11 +20,13 @@ class Atributos(models.Model):
 	NBR = 'NBR'
 	LTXT = 'LTXT'
 	DT = 'DT'
+	TAB = 'TAB'
 	TIPO_CHOICES = (
         (TXT, 'Texto'),
         (NBR, 'Número'),
         (LTXT, 'Texto Grande'),
         (DT, 'Data'),
+		(TAB, 'Tabela Externa'),
 	)
 	atributo = models.CharField(max_length=200)
 	tipo = models.CharField(
@@ -33,14 +37,28 @@ class Atributos(models.Model):
 	detalhamento = models.TextField()
 	def __str__(self):
 		return self.atributo
-	
+	class Meta:
+		verbose_name = ("Atributo")
+		verbose_name_plural = ("Atributos")
 	objects = DataFrameManager()
 
 class Atributos_Habilidades(models.Model):
 	habilidades = models.ForeignKey(Habilidades_Leitura, on_delete=models.CASCADE)
 	atributo = models.ForeignKey(Atributos, on_delete=models.CASCADE)
 	valor = models.TextField()
+	class Meta:
+		verbose_name = ("Atributos / Habilidades")
+		verbose_name_plural = ("Atributos / Habilidades")
+	objects = DataFrameManager()
 	
+class Elementos_Texto(models.Model):
+	categoria = models.IntegerField(default=0)
+	elemento = models.CharField('Elementos do Texto', max_length=200, unique=True)
+	def __str__(self):
+		return self.elemento
+	class Meta:
+		verbose_name = ("Elemento do Texto")
+		verbose_name_plural = ("Elementos do Texto")
 	objects = DataFrameManager()
 
 def atualizar_atributos_habilidades(sender, **kwargs):
