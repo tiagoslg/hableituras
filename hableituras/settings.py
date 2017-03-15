@@ -33,6 +33,7 @@ ALLOWED_HOSTS = ['localhost', 'tiagoslg.pythonanywhere.com']
 
 INSTALLED_APPS = [
 	'sentdesc.apps.SentdescConfig',
+	'planoleituras.apps.PlanoleiturasConfig',
 	'django.contrib.admin',
 	'django.contrib.auth',
 	'django.contrib.contenttypes',

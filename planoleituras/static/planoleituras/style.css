@@ -102,8 +102,8 @@ ul li a {
 
 #form-conteudo {
 	position: absolute;
-	width:100%; 
-	min-height:500px;
+	width:80%; 
+	min-height:80%;
     top: 60px;
     left: 10%;
     visibility: hidden;
@@ -111,7 +111,16 @@ ul li a {
 	-moz-box-shadow: 10px 10px 12px -1px rgba(0,0,0,0.6);
 	box-shadow: 10px 10px 12px -1px rgba(0,0,0,0.6);
 	/*background: #417690;*/
-	background-image: url("images/fundo.png");
+	background-image: url("fundo.png");
+}
+
+#texto {
+	float: left;
+	width: 200px;
+}
+
+#palavra {
+	float: left;
 }
 
 #form-detalhe {

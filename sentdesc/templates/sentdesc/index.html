@@ -1,18 +1,6 @@
 {% load static %}
 <link rel="stylesheet" type="text/css" href="{% static 'sentdesc/style.css' %}" />
-<script src="{% static 'sentdesc/jquery-3.1.1.min.js' %}" type="text/javascript"></script>
-<script type='text/javascript'>
-$(document).ready(function(){
-// Define as variaveis de acordo com a quantidade da página // opcional.
-	
-	$(document).on('click', '.botaoEditar', function(){
-        var detalhe = $(this).data('editar');
-        $('#form-detalhe').load(detalhe);
-		$('#form-conteudo').css("visibility", "visible");
-    });
-
-});
-</script>
+<link rel="stylesheet" type="text/css" href="{% static 'sentdesc/jquery.dataTables.min.css' %}" />
 
 <div id="container">
 	<div id="header">
@@ -29,68 +17,49 @@ $(document).ready(function(){
 	</div>
 	<div id="content">
 		{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
-
-		<form action="#" method="get">
-		<select name="fonte_filtro">
-		 <option value="origem">Origem da sentença</option>
-		 <option value="sentenca_descritora">Sentença Descritora</option>
-		 <option value="1">Elemento do Texto</option>
-		 <option value="2">Objetivo de Aprendizagem</option>
-		 <option value="3">Tipo de Gênero</option>
-		</select>
-		<input type="text" name="texto_filtro" />
-		<input type="submit" value="filtrar" />
-		</form>
-
+		
 		{% if ordered_sentdesc_list %}
-			<table border="1">
-				<tr>
-					<th>#</th>
-					<th>Origem</th>
-					<th>Sentença Descritora</th>
-			{% for atributo in total_atributos %}
-				<th>{{ atributo.atributo }}</th>
-			{% endfor %}
-				<th>&nbsp;</th>
-				</tr>
-			{% for habilidade in total_habilidades %}
-				<tr>
-					<td>{{ habilidade.id }}</td>
-					<td>{{ habilidade.origem }}</td>
-					<td>{{ habilidade.sent_desc }}</td>
-				{% for sentdesc in ordered_sentdesc_list %}
-					{% if habilidade.id == sentdesc.habilidades.id %}
-						<td>{{ sentdesc.valor }}</td>			
-					{% endif %}
+			<table id="example" class="display" cellspacing="0" width="100%" border="1">
+				<thead>
+					<tr>
+						<th>#</th>
+						<th>Origem</th>
+						<th>Sentença Descritora</th>
+				{% for atributo in total_atributos %}
+					<th>{{ atributo.atributo }}</th>
 				{% endfor %}
-					<td>
-					<button type="button" data-editar="{% url 'sentdesc:detalhe' habilidade.id %}" class="botaoEditar">Editar</button>
-					</td>
-				</tr>
-			{% endfor %}
+					<th>Editar</th>
+					</tr>
+				</thead>
+				<tfoot>
+					<tr>
+						<th>#</th>
+						<th>Origem</th>
+						<th>Sentença Descritora</th>
+				{% for atributo in total_atributos %}
+					<th>{{ atributo.atributo }}</th>
+				{% endfor %}
+					<th>Editar</th>
+					</tr>
+				</tfoot>
+				<tbody>
+				{% for habilidade in total_habilidades %}
+					<tr>
+						<td>{{ habilidade.id }}</td>
+						<td>{{ habilidade.origem }}</td>
+						<td id="{{ habilidade.id }}_sent_desc">{{ habilidade.sent_desc }}</td>
+					{% for sentdesc in ordered_sentdesc_list %}
+						{% if habilidade.id == sentdesc.habilidades.id %}
+							<td id="{{ habilidade.id }}_atributo_{{ sentdesc.id }}">{{ sentdesc.valor }}</td>			
+						{% endif %}
+					{% endfor %}
+						<td>
+						<button type="button" data-editar="{% url 'sentdesc:detalhe' habilidade.id %}" class="botaoEditar">Editar</button>
+						</td>
+					</tr>
+				{% endfor %}
+				</tbody>
 			</table>
-			{% if total_habilidades.has_other_pages %}
-				<ul class="pagination">
-					<li> Páginas: </li>
-				{% if total_habilidades.has_previous %}
-					<li><a href="?page={{ total_habilidades.previous_page_number }}&{{ link_filtro }}">&laquo;</a></li>
-				{% else %}
-					<li class="disabled"><span>&laquo;</span></li>
-				{% endif %}
-				{% for i in total_habilidades.paginator.page_range %}
-					{% if total_habilidades.number == i %}
-						<li class="active"><span>{{ i }} <span class="sr-only">(atual)</span></span></li>
-					{% else %}
-						<li><a href="?page={{ i }}&{{ link_filtro }}">{{ i }}</a></li>
-					{% endif %}
-				{% endfor %}
-				{% if total_habilidades.has_next %}
-					<li><a href="?page={{ total_habilidades.next_page_number }}&{{ link_filtro }}">&raquo;</a></li>
-				{% else %}
-					<li class="disabled"><span>&raquo;</span></li>
-				{% endif %}
-			</ul>
-			{% endif %}
 		{% else %}
 			<p>Nenhuma Sentença Descritora equivale ao filtro selecionado.</p>
 		{% endif %}
@@ -101,3 +70,60 @@ $(document).ready(function(){
 		</div>
 	</div>
 </div>
+
+<script src="{% static 'sentdesc/jquery-3.1.1.min.js' %}" type="text/javascript"></script>
+<script src="{% static 'sentdesc/jquery.dataTables.min.js' %}" type="text/javascript"></script>
+<script type='text/javascript'>
+$(document).ready(function(){
+// Define as variaveis de acordo com a quantidade da página // opcional.
+	// Setup - add a text input to each footer cell
+    $('#example thead th').each( function () {
+        var title = $(this).text();
+		if (title != 'Editar') {
+			$(this).html( title+'<input type="text" placeholder="Pesquisar..." />' );
+		}
+    } );
+	
+	//$('#example').DataTable();
+	// DataTable
+    var table = $('#example').DataTable({
+		"language": {
+            "lengthMenu": "Mostrando _MENU_ registros por página",
+            "zeroRecords": "Nenhum registro encontrado",
+            "info": "Página _PAGE_ de _PAGES_",
+            "infoEmpty": "Nenhum registro disponível",
+            "infoFiltered": "(filtrado de _MAX_ registros totais)",
+			"paginate": {
+				"first":      "Primeira",
+				"last":       "Última",
+				"next":       "Próxima",
+				"previous":   "Anterior"
+			},
+			"search":         "Pesquisar:"
+        },
+		"pagingType": "full_numbers",
+		"pageLength": 100,
+		"lengthMenu": [ [100, 200, 500, -1], [100, 200, 500, "Todos"] ]
+	});
+	
+	// Apply the search
+    table.columns().every( function () {
+        var that = this;
+ 
+        $( 'input', this.header() ).on( 'keyup change', function () {
+            if ( that.search() !== this.value ) {
+                that
+                    .search( this.value )
+                    .draw();
+            }
+        } );
+    } );
+	
+	$(document).on('click', '.botaoEditar', function(){
+        var detalhe = $(this).data('editar');
+        $('#form-detalhe').load(detalhe);
+		$('#form-conteudo').css("visibility", "visible");
+    });
+
+});
+</script>

@@ -1,0 +1,58 @@
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'sentdesc/style.css' %}" />
+
+<div id="container">
+	<div id="header">
+		<div id="branding">
+			<h1>Acessar o sistema</h1>
+		</div>
+	</div>
+	<div id="content">
+{% block content %}
+
+{% if form.errors %}
+<p>Nome de Usuário e senha não conferem. Favor tentar novamente.</p>
+{% endif %}
+
+{% if next %}
+    {% if user.is_authenticated %}
+    <p>Your account doesn't have access to this page. To proceed,
+    please login with an account that has access.</p>
+    {% else %}
+    <p>Please login to see this page.</p>
+    {% endif %}
+{% endif %}
+
+<form method="post" action="{% url 'login' %}">
+{% csrf_token %}
+<fieldset class="module aligned ">
+	<div class="form-row">
+		<div>
+			<label class="required" for="id_username">
+			{{ form.username.label_tag }}
+			</label>
+		</div>
+		<div class="related-widget-wrapper">
+			{{ form.username }}
+		</div>
+	</div>
+<div class="form-row">
+		<div>
+			<label class="required" for="id_password">
+			{{ form.password.label_tag }}
+		</div>
+		<div class="related-widget-wrapper">
+			{{ form.password }}
+		</div>
+</div>
+<div class="submit-row">
+<input type="submit" value="Entrar" />
+<input type="hidden" name="next" value="{% url 'sentdesc:index' %}" />
+</div>
+</form>
+
+{# Assumes you setup the password_reset view in your URLconf #}
+
+{% endblock %}
+	</div>
+</div>

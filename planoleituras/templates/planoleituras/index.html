@@ -1,0 +1,57 @@
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'planoleituras/style.css' %}" />
+
+<div id="container">
+	<div id="header">
+		<div id="branding">
+		<h1><a href="{% url 'planoleituras:index' %}">Plano de Leituras - Processamento de Textos</a></h1>
+		</div>
+		<div id="user-tools"
+		{% if request.user.is_authenticated %}
+		<p> você está logado como {{ request.user.username }} | <a href="{% url 'logout' %}">Sair </a></p>
+		{% else %}
+		<p><a href="{% url 'login' %}">Acessar o sistema</a></p>
+		{% endif %}
+		</div>
+	</div>
+	<div id="content">
+		{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
+
+		<form action="#" method="post">
+		{% csrf_token %}
+		<div class="form-row">
+			<div>
+				<label class="required" for='texto'>
+				Texto a ser processado:
+				</label>
+			</div>
+			<div class="related-widget-wrapper">
+				<textarea rows="4" cols="50" id="texto" name="texto" class="vLargeTextField" required></textarea>
+			</div>
+		</div>
+		<input type="submit" value="Processar" />
+		</form>
+		
+		<div id="texto_processado">
+			{% if texto_tagged %}<p><strong>Detalhes do Texto Enviado</strong></p>
+				<div id="texto">
+					{% for p,t in texto_tagged %}
+						<div id="palavra">{{ p }}&nbsp;-</div>
+						<div id="tag">&nbsp;{{ t }}</div>
+					{% endfor %}
+				</div>
+				<div id="estatisticas">
+					<div id="palavra"><strong>Total de palavras:&nbsp;</strong></div>
+					<div id="tag">&nbsp;{{ total }}</div>
+					<div id="palavra"><strong>Total Encontrado:&nbsp;</strong></div>
+					<div id="tag">&nbsp;{{ totalProc }}</div>
+						{% for p,t in counts %}
+							<div id="palavra">{{ p }}&nbsp;-</div>
+							<div id="tag">&nbsp;{{ t }}</div>
+					{% endfor %}
+				</div>
+			{% endif %}
+		</div>
+
+	</div>
+</div>
