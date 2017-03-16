@@ -12,7 +12,7 @@ import json
 
 # Create your views here.
 
-def index(request):
+"""def index(request):
 	ordered_sentdesc_list = Atributos_Habilidades.objects.select_related('habilidades')
 	total_habilidades = Habilidades_Leitura.objects.all()
 	total_atributos = Atributos.objects.all()
@@ -22,6 +22,31 @@ def index(request):
 		'total_habilidades': total_habilidades, 
 		'total_atributos': total_atributos,
 		}
+	return render(request, 'sentdesc/index.html', context)"""
+
+def index(request):
+	total_habilidades = Habilidades_Leitura.objects.all().order_by('id')
+	head = ''
+	data = ''
+	for habilidade in total_habilidades:
+		data += '<tr><td>' + str(habilidade.id) + '</td>'
+		data += '<td>' + str(habilidade.origem) + '</td>'
+		data +=	'<td id="' + str(habilidade.id) + '_sent_desc">' + str(habilidade.sent_desc) + '</td>'
+		total_atributos = Atributos_Habilidades.objects.filter(habilidades=habilidade.id).order_by('atributo')
+		if head == '':
+			for atributo in total_atributos:
+				head += '<th>' + str(atributo.atributo.atributo) + '</td>'
+		for atributo in total_atributos:
+			data += '<td id="' + str(habilidade.id) + '_atributo_' + str(atributo.id) + '">' + str(atributo.valor) + '</td>'
+		data += '<td><button type="button" data-editar="' + reverse('sentdesc:detalhe', kwargs={'sent_desc_id': habilidade.id}) + '" class="botaoEditar">Editar</button></td>'
+		data += '</tr>'
+		
+	context = {
+		'data': data, 
+		'head': head, 
+		}
+	del(total_habilidades)
+	del(total_atributos)
 	return render(request, 'sentdesc/index.html', context)
 
 @login_required()
