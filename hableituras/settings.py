@@ -26,7 +26,7 @@ SECRET_KEY = 'kl_@z0h!$s5^b_e*p*u7ntsp_ihnn4+7ywn3&@t7-e0_dr1kyn'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', 'tiagoslg.pythonanywhere.com']
+ALLOWED_HOSTS = ['hosts_sistema']
 
 
 # Application definition
@@ -80,18 +80,13 @@ WSGI_APPLICATION = 'hableituras.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
+	'NAME':  os.path.join(BASE_DIR, 'db.sqlite3'),
 		#'ENGINE': 'mysql.connector.django',
 		#'ENGINE': 'django.db.backends.mysql',
-        'NAME':  os.path.join(BASE_DIR, 'db.sqlite3'),
-		#'NAME':  'hableituras',
-		#'HOST': '127.0.0.1',
-		#'USER': 'root',
-		#'PASSWORD': 'lalalala',
-		#'PORT': '3306',
-		#'HOST': 'localhost',
-		#'OPTIONS': {
-        #  'autocommit': True,
-        #},
+		#'NAME':  '[nome_base]',
+		#'HOST': '[host_base]',
+		#'USER': '[user_base]',
+		#'PASSWORD': '[senha_base]',
     }
 }
 
