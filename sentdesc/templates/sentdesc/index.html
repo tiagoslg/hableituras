@@ -29,6 +29,15 @@
 						<th>Editar</th>
 					</tr>
 				</thead>
+				<tfoot>
+					<tr>
+						<th>#</th>
+						<th>Origem</th>
+						<th>Sentença Descritora</th>
+						{{ head|safe }}
+						<th>Editar</th>
+					</tr>
+				</tfoot>
 				<tbody>
 						{{ data|safe }}
 				</tbody>
@@ -50,10 +59,12 @@
 $(document).ready(function(){
 // Define as variaveis de acordo com a quantidade da página // opcional.
 	// Setup - add a text input to each footer cell
-    $('#example thead th').each( function () {
+    $('#example tfoot th').each( function () {
         var title = $(this).text();
 		if (title != 'Editar' && title != '#') {
-			$(this).html( title+'<input type="text" placeholder="Pesquisar..." />' );
+			$(this).html( '<input type="text" placeholder="Pesquisar..." />' );
+		}else{
+			$(this).html( ' ' );
 		}
     } );
 	
@@ -83,7 +94,7 @@ $(document).ready(function(){
     table.columns().every( function () {
         var that = this;
  
-        $( 'input', this.header() ).on( 'keyup change', function () {
+        $( 'input', this.footer() ).on( 'keyup change', function () {
             if ( that.search() !== this.value ) {
                 that
                     .search( this.value )
@@ -97,6 +108,8 @@ $(document).ready(function(){
         $('#form-detalhe').load(detalhe);
 		$('#form-conteudo').css("visibility", "visible");
     });
+
+	$('#example tfoot tr').appendTo('#example thead');
 
 });
 </script>
