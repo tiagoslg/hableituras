@@ -18,19 +18,46 @@
 	<div id="content">
 		{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 		
-		{% if data %}
+		{% if ordered_sentdesc_list %}
 			<table id="example" class="display" cellspacing="0" width="100%" border="1">
 				<thead>
 					<tr>
 						<th>#</th>
 						<th>Origem</th>
 						<th>Sentença Descritora</th>
-						{{ head|safe }}
-						<th>Editar</th>
+				{% for atributo in total_atributos %}
+					<th>{{ atributo.atributo }}</th>
+				{% endfor %}
+					<th>Editar</th>
 					</tr>
 				</thead>
+				<tfoot>
+					<tr>
+						<th>#</th>
+						<th>Origem</th>
+						<th>Sentença Descritora</th>
+				{% for atributo in total_atributos %}
+					<th>{{ atributo.atributo }}</th>
+				{% endfor %}
+					<th>Editar</th>
+					</tr>
+				</tfoot>
 				<tbody>
-						{{ data|safe }}
+				{% for habilidade in total_habilidades %}
+					<tr>
+						<td>{{ habilidade.id }}</td>
+						<td>{{ habilidade.origem }}</td>
+						<td id="{{ habilidade.id }}_sent_desc">{{ habilidade.sent_desc }}</td>
+					{% for sentdesc in ordered_sentdesc_list %}
+						{% if habilidade.id == sentdesc.habilidades.id %}
+							<td id="{{ habilidade.id }}_atributo_{{ sentdesc.id }}">{{ sentdesc.valor }}</td>			
+						{% endif %}
+					{% endfor %}
+						<td>
+						<button type="button" data-editar="{% url 'sentdesc:detalhe' habilidade.id %}" class="botaoEditar">Editar</button>
+						</td>
+					</tr>
+				{% endfor %}
 				</tbody>
 			</table>
 		{% else %}
@@ -52,7 +79,7 @@ $(document).ready(function(){
 	// Setup - add a text input to each footer cell
     $('#example thead th').each( function () {
         var title = $(this).text();
-		if (title != 'Editar' && title != '#') {
+		if (title != 'Editar') {
 			$(this).html( title+'<input type="text" placeholder="Pesquisar..." />' );
 		}
     } );

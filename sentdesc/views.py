@@ -82,7 +82,6 @@ def atualizar(request, sent_desc_id):
 		context['error_message'] = 'Habilidade de Leitura atualizada com sucesso'
 		context['sent_desc_id'] = sent_desc_id
 		context[str(sent_desc_id) + '_sent_desc'] = request.POST['sent_desc']
-		print(context)
 		return HttpResponse(
             json.dumps(context),
             content_type="application/json"

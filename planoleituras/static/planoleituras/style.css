@@ -104,9 +104,9 @@ ul li a {
 	position: absolute;
 	width:80%; 
 	min-height:80%;
-    top: 60px;
-    left: 10%;
-    visibility: hidden;
+	top: 60px;
+	left: 10%;
+	visibility: hidden;
 	-webkit-box-shadow: 10px 10px 12px -1px rgba(0,0,0,0.6);
 	-moz-box-shadow: 10px 10px 12px -1px rgba(0,0,0,0.6);
 	box-shadow: 10px 10px 12px -1px rgba(0,0,0,0.6);
@@ -114,27 +114,72 @@ ul li a {
 	background-image: url("fundo.png");
 }
 
-#texto {
+.texto {
 	float: left;
-	width: 200px;
+	min-width: 500px
 }
 
-#palavra {
-	float: left;
+#item_texto{
+	min-width: 500px;
+	height: 42px;
+	border-bottom: 1px dotted;
 }
 
-#form-detalhe {
+div.id_tag {
+	float: left;
+	width: 40px;
+	border-right: 1px dotted;
+	line-height: 3;
+	margin-left: 3;
+}
+
+div.palavra {
+	float: left;
+	width: 160px;
+	border-right: 1px dotted;
+	line-height: 3;
+	margin-left: 3px;
+}
+
+div.tag {
+	float: left;
+	vertical-align: middle;
+	line-height: 3;
+	width: 290px;
+	margin-left: 3px;
+}
+
+select.tag{
+	font-size: 9px;
+	width: 140px;
+}
+
+div.cabecalho {
+	font-weight: bold;
+	text-align: center;
+}
+
+.info_check {
+	font-size: 9px
+}
+
+#post_form {
 	width: 90%;
-    min-height: 90%;
-    left: 50;
-    top: 50;
+	height: 30px;
 }
+
+/*#form-detalhe {
+	width: 90%;
+	min-height: 90%;
+	left: 50;
+	top: 50;
+}*/
 
 fieldset {
-    margin: 0;
-    padding: 0;
-    border: none;
-    border-top: 1px solid #eee;
+	margin: 0;
+	padding: 0;
+	border: none;
+	border-top: 1px solid #eee;
 }
 
 .module {
@@ -188,6 +233,11 @@ textarea {
     vertical-align: top;
 }
 
+input[type=checkbox] {
+	margin-left: 6px;
+	margin-bottom: 6px;
+}
+
 .aligned {
 	width: 100%
 }
@@ -195,3 +245,54 @@ textarea {
 .colM .vLargeTextField, .colM .aligned .vXMLLargeTextField {
     width: 610px;
 }
+
+.btn, .glyphicon {
+	margin: 3px;
+	font-size: 9px;
+}
+.estatisticas_texto::after {
+    content: "";
+    clear: both;
+    display: table;
+}
+
+.column {
+    float: left;
+    padding: 5px;
+}
+
+.menu {
+    width: 80%;
+}
+
+.content {
+    width: 20%;
+}
+
+.menu ul, .content ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.menu li, .content li {
+    padding: 0px;
+    margin-bottom: 5px;
+    /* background-color: #33b5e5; */
+    /* color: #ffffff; */
+    display: list-item;
+    border-bottom: 1px dotted;
+}
+
+.estatisticas_texto {
+    width: 265px;
+}
+
+.content li {
+    text-align: right;
+}
+
+.menu li {
+    font-weight: 600;
+}
+

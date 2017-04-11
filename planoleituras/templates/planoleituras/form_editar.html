@@ -1,90 +1,109 @@
 {% load static %}
-<link rel="stylesheet" type="text/css" href="{% static 'sentdesc/style.css' %}" />
+{% load planoleituras_extras %}
 <script type='text/javascript'>
 $(document).ready(function(){
 // Define as variaveis de acordo com a quantidade da página // opcional.
 	
-	$(document).on('click', '.botaoFechar', function(){
-        $('#form-conteudo').css("visibility", "hidden");
+	$(document).on('click', '.editable-cancel', function(){
+		var id_tag = document.getElementById('tag_id').value;
+		var tag_atual = document.getElementById('tag_atual').value;
+		var url = document.getElementById('url').value;
+		var link = '<a href="#" data-value="'+tag_atual+'" data-placeholder="" data-name="tag" data-url="'+url+'" data-pk="'+id_tag+'" data-type="select" class="tag_Editar" style="display: inline;">'+tag_atual+'</a>'
+		$("#tag_" + id_tag).html(link);
+		$("#tag_" + id_tag).removeClass('tag_' + id_tag + '_editando');
     });
+	
+	// Submit post on submit
+	$('#post-form').on('submit', function(event){
+		event.preventDefault();
+		console.log("form submitted!")  // sanity check
+		create_post();
+	});
+	
+	//recuperando o csrf_token
+	function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+	}
+	var csrftoken = getCookie('csrftoken');
+	
+	//configurando o csrf_token no cabeçalho
+	function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+	}
+	$.ajaxSetup({
+		beforeSend: function(xhr, settings) {
+			if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+				xhr.setRequestHeader("X-CSRFToken", csrftoken);
+			}
+		}
+	});
+	
+	// AJAX for posting
+	function create_post() {
+		console.log("create post is working!") // sanity check
+		$.ajax({
+			url : "{% url 'planoleituras:atualizar' tag_id %}", // the endpoint
+			type : "POST", // http method
+			data : { 
+				'tag_id' : $("#tag_id").val(),
+				'tag' : $("#tag").val(),
+			}, // data sent with the post request
+
+			// handle a successful response
+			success : function(json) {
+				console.log(json); // log the returned json to the console
+				console.log("success"); // another sanity check
+				for (x in json) {
+					if (x != 'error_message' && x != 'sent_desc_id'){
+						$("#"+x).html(json[x]);
+					}
+				}
+				$('#form-conteudo').css("visibility", "hidden");
+			},
+
+			// handle a non-successful response
+			error : function(xhr,errmsg,err) {
+				$('#results').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
+					" <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
+				console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+			}
+		});
+	};
 
 });
 </script>
-<div id="container">
-	<div id="content">
-		<div>
-		<form action="{% url 'sentdesc:atualizar' sent_desc.id %}" method="post">
-			{% csrf_token %}
-			<input type="hidden" name="sent_desc_id" value='{{ sent_desc.id }}' />
-			<input type="hidden" name="filtro" value='{{ link_filtro }}' />
-			<fieldset class="module aligned ">
-				<div class="form-row">
-					<div>
-						<label class="required" for="origem">
-						Origem:
-						</label>
-					</div>
-					<div class="related-widget-wrapper">
-					{{ sent_desc.origem }}
-					</div>
-				</div>
-				<div class="form-row">
-					<div>
-						<label class="required" for="id_origem">
-						ID Origem:
-						</label>
-					</div>
-					<div class="related-widget-wrapper">
-					{{ sent_desc.id_origem }}
-					</div>
-				</div>
-				<div class="form-row">
-					<div>
-						<label class="required" for="sent_desc">
-						Sentença Descritora:
-						</label>
-					</div>
-					<div class="related-widget-wrapper">
-					<textarea id="sent_desc" name="sent_desc" class="vLargeTextField" cols="40" rows="5" required>{{ sent_desc.sent_desc }}</textarea>
-					</div>
-				</div>	
-				{% for atributo in atributos %}
-					<div class="form-row">
-					<div>
-						<label class="required" for='atributo{{ atributo.id }}'>
-						{{ atributo.atributo }}:
-						</label>
-					</div>
-					<div class="related-widget-wrapper">
-						{% if atributo.atributo.tipo == "TXT" %}
-							<input type="text" id='atributo{{ atributo.id }}' name='atributo{{ atributo.id }}' value='{{ atributo.valor }}' required />
-						{% elif atributo.atributo.tipo == "NBR" %}
-							<input type="number" id='atributo{{ atributo.id }}' name='atributo{{ atributo.id }}' value='{{ atributo.valor }}' required />
-						{% elif atributo.atributo.tipo == "DT" %}
-							<input type="date" id='atributo{{ atributo.id }}' name='atributo{{ atributo.id }}' value='{{ atributo.valor }}' required />
-						{% elif atributo.atributo.tipo == "LTXT" %}
-							<textarea id='atributo{{ atributo.id }}' name='atributo{{ atributo.id }}' class="vLargeTextField" cols="40" rows="5" required>{{ atributo.valor }}</textarea>
-						{% elif atributo.atributo.tipo == "TAB" %}
-							<select id='atributo{{ atributo.id }}' name='atributo{{ atributo.id }}' required>
-								<option value="">----------</option>
-							{% for elemento in elementos_texto %}
-								{% if elemento.elemento == atributo.valor %}
-									<option value="{{ elemento.elemento }}" selected>{{ elemento.elemento }}</option>
-								{% else %}
-									<option value="{{ elemento.elemento }}">{{ elemento.elemento }}</option>
-								{% endif %}
-							{% endfor %}
-							</select>
-						{% endif %}
-					</div>
-					</div>
-				{% endfor %}
-			</fieldset>
-			<div class="submit-row">
-				<input type="submit" value="Atualizar" /> || 
-				<button type="button" class="botaoFechar">Cancelar</button>
-			</div>			
-		</form>
-		</div>
-	</div>
-</div>
+<form action="{% url 'planoleituras:atualizar' tag_id %}" method="post" id="post_form">
+	{% csrf_token %}
+	<input type="hidden" name="tag_id" value='{{ tag_id }}' id="tag_id" />
+	<input type="hidden" name="tag_atual" value='{{ tag_atual }}' id="tag_atual" />
+	<input type="hidden" name="url" value='{% url "planoleituras:detalhe" tag_id %}' id="url" />
+	<fieldset>
+		<select id='tag' class='tag' required>
+		{% if etiquetas %}
+			{% for etiqueta, descritor in etiquetas.items|sort %}
+				{% if etiqueta == tag_atual %}
+					<option value='{{ etiqueta }}' selected >{{ descritor }}</option>
+				{% else %}
+					<option value='{{ etiqueta }}' >{{ descritor }}</option>
+				{% endif %}
+			{% endfor %}
+		{% endif %}
+		</select>
+		<button type="button" class="btn btn-primary btn-sm editable-submit"><i class="glyphicon glyphicon-ok"></i></button>
+		<button type="button" class="btn btn-default btn-sm editable-cancel"><i class="glyphicon glyphicon-remove"></i></button>
+		<input type="checkbox" name="todas" value="1" checked></form>
+	</fieldset>
+</form>

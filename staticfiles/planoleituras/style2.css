@@ -102,30 +102,65 @@ ul li a {
 
 #form-conteudo {
 	position: absolute;
-	width:100%; 
-	min-height:500px;
-    top: 60px;
-    left: 10%;
-    visibility: hidden;
+	width:80%; 
+	min-height:80%;
+	top: 60px;
+	left: 10%;
+	visibility: hidden;
 	-webkit-box-shadow: 10px 10px 12px -1px rgba(0,0,0,0.6);
 	-moz-box-shadow: 10px 10px 12px -1px rgba(0,0,0,0.6);
 	box-shadow: 10px 10px 12px -1px rgba(0,0,0,0.6);
 	/*background: #417690;*/
-	background-image: url("images/fundo.png");
+	background-image: url("fundo.png");
+}
+
+.texto {
+	float: left;
+	width: 420px;
+}
+
+#item_texto{
+	width: 440;
+}
+
+div.id_tag {
+	float: left;
+	width: 20px;
+	border-right: 1px dotted;
+}
+
+div.palavra {
+	float: left;
+	width: 200px;
+	border-right: 1px dotted;
+}
+
+div.tag {
+	float: left;
+}
+
+select.tag{
+	font-size: 9px;
+	width: 150px;
+}
+
+div.cabecalho {
+	font-weight: bold;
+	text-align: center;
 }
 
 #form-detalhe {
 	width: 90%;
-    min-height: 90%;
-    left: 50;
-    top: 50;
+	min-height: 90%;
+	left: 50;
+	top: 50;
 }
 
 fieldset {
-    margin: 0;
-    padding: 0;
-    border: none;
-    border-top: 1px solid #eee;
+	margin: 0;
+	padding: 0;
+	border: none;
+	border-top: 1px solid #eee;
 }
 
 .module {
@@ -186,3 +221,27 @@ textarea {
 .colM .vLargeTextField, .colM .aligned .vXMLLargeTextField {
     width: 610px;
 }
+
+bootstrap.min.css:7
+
+.btn {
+    display: inline-block;
+    margin-bottom: 0;
+    font-weight: 400;
+    text-align: center;
+    vertical-align: middle;
+    cursor: pointer;
+    background-image: none;
+    border: 1px solid transparent;
+    white-space: nowrap;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    border-radius: 4px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+

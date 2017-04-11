@@ -1,6 +1,14 @@
 {% load static %}
+{% load planoleituras_extras %}
+<!DOCTYPE html>
+<html>
+<head>
+<script src="{% static 'planoleituras/jquery-3.1.1.min.js' %}" type="text/javascript"></script>
+<title>Plano Leituras</title>
+<link rel="stylesheet" type="text/css" href="{% static 'planoleituras/bootstrap.min.css' %}" />
 <link rel="stylesheet" type="text/css" href="{% static 'planoleituras/style.css' %}" />
-
+</head>
+<body>
 <div id="container">
 	<div id="header">
 		<div id="branding">
@@ -21,6 +29,16 @@
 		{% csrf_token %}
 		<div class="form-row">
 			<div>
+				<label class="required" for='titulo'>
+				Título:
+				</label>
+			</div>
+			<div class="related-widget-wrapper">
+				<input type="text" id='titulo' name='titulo' value='' required />
+			</div>
+		</div>
+		<div class="form-row">
+			<div>
 				<label class="required" for='texto'>
 				Texto a ser processado:
 				</label>
@@ -29,25 +47,71 @@
 				<textarea rows="4" cols="50" id="texto" name="texto" class="vLargeTextField" required></textarea>
 			</div>
 		</div>
+		<div class="form-row">
+			<div>
+				<label class="required" for='origem'>
+				Origem do texto:
+				</label>
+			</div>
+			<div class="related-widget-wrapper">
+				<input type="text" id='origem' name='origem' value='' />
+			</div>
+		</div>
 		<input type="submit" value="Processar" />
 		</form>
 		
 		<div id="texto_processado">
-			{% if texto_tagged %}<p><strong>Detalhes do Texto Enviado</strong></p>
-				<div id="texto">
-					{% for p,t in texto_tagged %}
-						<div id="palavra">{{ p }}&nbsp;-</div>
-						<div id="tag">&nbsp;{{ t }}</div>
-					{% endfor %}
+			{% if texto_etiquetado %}
+				<p><strong>Titulo:</strong> {{ titulo }}</p>
+				<div id="estatisticas_texto" class="estatisticas_texto">
+					<div class="column menu">
+						<ul>
+							<li>Itens Analisados:</li>
+							<li>Itens Encontrados:</li>
+							<li>Itens ignorados:</li>
+							<li>Palvras de conteúdo:</li>
+							<li>Palvras comuns:</li>
+							<li>Palavras não etiquetadas:</li>
+						</ul>
+					</div>
+					<div class="column content">
+						<ul>
+							<li id="total_valor" class="valor_estatistica">{{ total }}</li>
+							<li id="totalProc_valor" class="valor_estatistica">{{ totalProc }}</li>
+							<li id="tag_ignoradas_valor" class="valor_estatistica">{{ tag_ignoradas }}</li>
+							<li id="total_ctw_valor" class="valor_estatistica">{{ total_ctw }}</li>
+							<li id="total_cow_valor" class="valor_estatistica">{{ total_cow }}</li>
+							<li id="totalNProc_valor" class="valor_estatistica">{{ totalNProc }}</li>
+						</ul>
+					</div>
 				</div>
-				<div id="estatisticas">
-					<div id="palavra"><strong>Total de palavras:&nbsp;</strong></div>
-					<div id="tag">&nbsp;{{ total }}</div>
-					<div id="palavra"><strong>Total Encontrado:&nbsp;</strong></div>
-					<div id="tag">&nbsp;{{ totalProc }}</div>
-						{% for p,t in counts %}
-							<div id="palavra">{{ p }}&nbsp;-</div>
-							<div id="tag">&nbsp;{{ t }}</div>
+				<p><strong>Dicionário de Etiquetas:</strong></p>
+				<div id="dicionario">
+					<ul>
+					{% for t,d in tag_list.items|sort %}
+						<li>{{ t }} - {{ d }} ({{  counts|get_value_dict:t}})</li>
+					{% endfor %}
+					</ul>
+				</div>
+				<p><strong>Detalhes do Texto Enviado - Novo</strong></p>
+				<div id="texto" class="texto">
+					<div id="item_texto">
+						<div id="id_tag" class="id_tag cabecalho">ID</div>
+						<div id="palavra" class="palavra cabecalho">Item do Texto</div>
+						<div id="tag" class="tag cabecalho">Etiqueta</div>
+					</div>
+					{% for key,atributos in texto_etiquetado.items %}
+						<div id="item_texto">
+							<div id="id_tag_{{ atributos.id_tag }}" class="id_tag">{{ atributos.id_tag }}</div>
+							<div id="palavra_{{ atributos.id_tag }}" class="palavra ">{{ atributos.word }}</div>
+							<div id="tag_item" class="tag">
+								<div id="form_{{ atributos.id_tag }}"></div>
+								<div id="tag_{{ atributos.id_tag }}" class="tag_{{ atributos.id_tag }}">
+									<span id="tag_{{ atributos.id_tag }}_value" class="tag_{{ atributos.id_tag }}_value" style="display: inline;">{{ atributos.tag }}</span>
+									<button type="button" id="button_{{ atributos.id_tag }}" class="btn btn-default btn-sm edit tagEditar" data-textoid="{{ texto_id }}" data-value="{{ atributos.tag }}" data-placeholder="" data-palavra="{{ atributos.word }}" data-name="tag" data-url="{% url 'planoleituras:atualizar' atributos.id_tag %}" data-pk="{{ atributos.id_tag }}" data-type="select"><i class="glyphicon glyphicon-pencil"></i></button>
+								</div>
+							</div>
+						</div>
 					{% endfor %}
 				</div>
 			{% endif %}
@@ -55,3 +119,170 @@
 
 	</div>
 </div>
+
+<script type='text/javascript'>
+$(document).ready(function(){
+// Define as variaveis de acordo com a quantidade da página // opcional.
+	
+	$('.tagEditar').on( "click", function() {
+		if($(this).data('value') != ''){
+			$(".editando").html(' ');
+			$(".editando").removeClass('editando');
+			var id_tag = $(this).data('pk');
+			var tag_atual = $(this).data('value');
+			var palavra = $(this).data('palavra');
+			var action = $(this).data('url');
+			var texto_id = $(this).data('textoid');
+			//console.log("id_tag:" + id_tag)
+			//console.log("palavra:" + palavra)
+			if($(this).data('type') == 'select'){
+				if(id_tag != 0){
+					var html = load_form(id_tag, tag_atual, action, texto_id)
+					$("#form_" + id_tag).html(html);
+					$(".tag_" + id_tag).css("display", "none");
+					//console.log(html)
+				}
+			}
+			$("#form_" + id_tag).addClass('editando');
+		}
+	});
+	
+	$(document).on('click', '.editable-cancel', function(){
+		var id_tag = document.getElementById('tag_id').value;
+		var tag_atual = document.getElementById('tag_atual').value;
+		//$("#tag_" + id_tag).html(load_link(id_tag, tag_atual));
+		$("#form_" + id_tag).html(' ');
+		$("#form_" + id_tag).removeClass('editando');
+		$(".tag_" + id_tag).css("display", "inline");
+    });
+
+	// Submit post on submit
+	//$('#submit').click(function(event){
+	$(document).on('click', '#submit', function(event){
+		event.preventDefault();
+		console.log("form submitted!")  // sanity check
+		create_post();
+	});
+	
+	//recuperando o csrf_token
+	function getCookie(name) {
+    var cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        var cookies = document.cookie.split(';');
+        for (var i = 0; i < cookies.length; i++) {
+            var cookie = jQuery.trim(cookies[i]);
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+	}
+	var csrftoken = getCookie('csrftoken');
+	
+	//configurando o csrf_token no cabeçalho
+	function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+	}
+	$.ajaxSetup({
+		beforeSend: function(xhr, settings) {
+			if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+				xhr.setRequestHeader("X-CSRFToken", csrftoken);
+			}
+		}
+	});
+	
+	// AJAX for posting
+	function create_post() {
+		console.log("create post is working!") // sanity check
+		//alert($("#tag_nova").selected())
+		console.log('tag_atual' + $("#tag_atual").val())
+		console.log('tag_nova' + $("#tag_nova").val())
+		console.log('todas' + $("#todas").val())
+		console.log('tag_id' + $("#tag_id").val())
+		$.ajax({
+			url : $("#url").val(), // the endpoint
+			//url : '/',
+			type : "POST", // http method
+			data : { 
+				'tag_atual' : $("#tag_atual").val(),
+				'tag_nova' : $("#tag_nova").val(),
+				'todas' : $("#todas").val(),
+				'tag_id' : $("#tag_id").val(),
+				'texto_id' : $("#texto_id").val(),
+			}, // data sent with the post request
+
+			// handle a successful response
+			success : function(json) {
+				console.log(json); // log the returned json to the console
+				console.log("success"); // another sanity check
+				var id_tag = json['tag_id']
+				if (json['todas'] == 1){
+					var ids = json['tag_id_alterado'].split("|");
+					for (id in ids) {
+						if(ids[id] != ''){
+							console.log(ids[id]);
+							$("#tag_"+ids[id]+"_value").html(json['tag_nova']);
+							$("#button_"+ids[id]).data('value', json['tag_nova']);
+						}
+					}
+				}else{
+					console.log(json['tag_id_alterado'].val);
+					$("#tag_"+id_tag+"_value").html(json['tag_nova']);
+					$("#button_"+id_tag).data('value', json['tag_nova']);
+				}
+				$("#total_valor").html(json['total']);
+				$("#totalProc_valor").html(json['totalProc']);
+				$("#tag_ignoradas_valor").html(json['tag_ignoradas']);
+				$("#total_ctw_valor").html(json['total_ctw']);
+				$("#total_cow_valor").html(json['total_cow']);
+				$("#totalNProc_valor").html(json['totalNProc']);
+				$("#form_" + id_tag).html(' ');
+				$("#form_" + id_tag).removeClass('editando');
+				$(".tag_" + id_tag).css("display", "inline");
+				
+			},
+
+			// handle a non-successful response
+			error : function(xhr,errmsg,err) {
+				$('#results').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
+					" <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
+				console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+			}
+		});
+	};
+	
+	function load_form(tag_id, tag_atual, action, texto_id) {
+		html = '<form method="post" id="post_form">';
+			html += "{% csrf_token %}";
+			html += '<input type="hidden" name="texto_id" value="'+texto_id+'" id="texto_id" />';
+			html += '<input type="hidden" name="tag_id" value="'+tag_id+'" id="tag_id" />'; 
+			html += '<input type="hidden" name="tag_atual" value="'+tag_atual+'" id="tag_atual" />'; 
+			html += '<input type="hidden" name="url" value="'+action+'" id="url" />';
+			html += '<fieldset>';
+				html += '<select name="tag_nova" id="tag_nova" class="tag" required>';
+				{% if etiquetas %}
+					{% for etiqueta, descritor in etiquetas.items|sort %}
+						html += '<option value="{{ etiqueta }}" '+("{{ etiqueta }}"==tag_atual?"selected":"")+' >{{ descritor }}</option>';
+					{% endfor %}
+				{% endif %}
+				html += '</select>';
+				html += '<button type="button" id="submit" class="btn btn-primary btn-sm editable-submit"><i class="glyphicon glyphicon-ok"></i></button>';
+				html += '<button type="button" class="btn btn-default btn-sm editable-cancel"><i class="glyphicon glyphicon-remove"></i></button>';
+				html += '<input type="checkbox" name="todas" id="todas" value="1" checked></form>';
+			html += '</fieldset>';
+		html += '</form>';
+		return html
+	};
+	
+	function load_link(tag_id, tag, texto_id) {
+		html = '<span data-textoid="'+texto_id+'" data-value="'+tag+'" data-placeholder="" data-palavra="" data-name="tag" data-url="'+tag_id+'/atualizar" data-pk="'+tag_id+'" data-type="select" class="tag_Editar" style="display: inline;">'+tag+'</a>';
+		return html
+	}
+});
+</script>
+</body>
+</html>
