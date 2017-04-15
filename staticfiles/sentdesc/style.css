@@ -41,7 +41,7 @@ ul li a {
 
 #header {
     width: auto;
-    height: 40px;
+    height: 80px;
     padding: 10px 40px;
     background: #417690;
     line-height: 40px;
@@ -185,4 +185,12 @@ textarea {
 
 .colM .vLargeTextField, .colM .aligned .vXMLLargeTextField {
     width: 610px;
+}
+
+.navbar-nav>li>a {
+    color: #f5dd5d;
+}
+
+.nav>li>a:hover {
+    background-color: #54839b;
 }

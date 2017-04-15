@@ -1,0 +1,38 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+<script src="{% static 'sentdesc/jquery-3.1.1.min.js' %}" type="text/javascript"></script>
+<title>Sentenças Descritoras</title>
+<link rel="stylesheet" type="text/css" href="{% static 'planoleituras/bootstrap.min.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'planoleituras/style.css' %}" />
+<link rel="stylesheet" type="text/css" href="{% static 'sentdesc/jquery.dataTables.min.css' %}" />
+</head>
+<body>
+<div id="container">
+	<nav class="navbar navbar-inverse">
+	<div id="header">
+		<div id="branding">
+		<h1><a href="{% url 'core:index' %}">Leitura do Mundo</a></h1>
+		</div>
+		<div id="user-tools"
+		{% if request.user.is_authenticated %}
+		<p> você está logado como {{ request.user.username }} | <a href="{% url 'logout' %}">Sair </a></p>
+		{% else %}
+		<p><a href="{% url 'login' %}">Acessar o sistema</a></p>
+		{% endif %}
+		</div>
+		<div class="clearfix"></div>
+		<div id="menu" style="display: inline-block;">
+			<ul class="nav navbar-nav">
+				<li><a href="{% url 'sentdesc:index' %}">Sentenças Descritoras</a></li>
+				<li><a href="{% url 'planoleituras:index' %}">Plano de Textos</a></li>
+			</ul>
+		</div>
+	</div>
+	</nav>
+	<div id="content">
+	</div>
+</div>
+</body>
+</html>

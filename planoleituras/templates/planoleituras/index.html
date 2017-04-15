@@ -10,6 +10,7 @@
 </head>
 <body>
 <div id="container">
+	<nav class="navbar navbar-inverse">
 	<div id="header">
 		<div id="branding">
 		<h1><a href="{% url 'planoleituras:index' %}">Plano de Leituras - Processamento de Textos</a></h1>
@@ -21,7 +22,15 @@
 		<p><a href="{% url 'login' %}">Acessar o sistema</a></p>
 		{% endif %}
 		</div>
+		<div class="clearfix"></div>
+		<div id="menu" style="display: inline-block;">
+			<ul class="nav navbar-nav">
+				<li><a href="{% url 'sentdesc:index' %}">Sentenças Descritoras</a></li>
+				<li><a href="{% url 'planoleituras:index' %}">Plano de Textos</a></li>
+			</ul>
+		</div>
 	</div>
+	</nav>
 	<div id="content">
 		{% if error_message %}<p><strong>{{ error_message }}</strong></p>{% endif %}
 
@@ -78,29 +87,29 @@
 						<ul>
 							<li id="total_valor" class="valor_estatistica">{{ total }}</li>
 							<li id="totalProc_valor" class="valor_estatistica">{{ totalProc }}</li>
-							<li id="tag_ignoradas_valor" class="valor_estatistica">{{ tag_ignoradas }}</li>
-							<li id="total_ctw_valor" class="valor_estatistica">{{ total_ctw }}</li>
-							<li id="total_cow_valor" class="valor_estatistica">{{ total_cow }}</li>
+							<li id="totalIgn_valor" class="valor_estatistica">{{ totalIgn }}</li>
+							<li id="totalPCt_valor" class="valor_estatistica">{{ totalPCt }}</li>
+							<li id="totalPCo_valor" class="valor_estatistica">{{ totalPCo }}</li>
 							<li id="totalNProc_valor" class="valor_estatistica">{{ totalNProc }}</li>
 						</ul>
 					</div>
 				</div>
 				<p><strong>Dicionário de Etiquetas:</strong></p>
 				<div id="dicionario">
-					<ul>
-					{% for t,d in tag_list.items|sort %}
-						<li>{{ t }} - {{ d }} ({{  counts|get_value_dict:t}})</li>
+					<ul class="list-inline">
+					{% for t,d in tag_list_c.items|sort %}
+						<li> <span class="glyphicon glyphicon-menu-right"></span>{{ d.etiqueta }} - {{ d.descritor }} ({{  d.total }})</li>
 					{% endfor %}
 					</ul>
 				</div>
-				<p><strong>Detalhes do Texto Enviado - Novo</strong></p>
+				<p><strong>Detalhes do Texto Enviado</strong></p>
 				<div id="texto" class="texto">
 					<div id="item_texto">
 						<div id="id_tag" class="id_tag cabecalho">ID</div>
 						<div id="palavra" class="palavra cabecalho">Item do Texto</div>
 						<div id="tag" class="tag cabecalho">Etiqueta</div>
 					</div>
-					{% for key,atributos in texto_etiquetado.items %}
+					{% for key,atributos in texto_etiquetado.items|sort %}
 						<div id="item_texto">
 							<div id="id_tag_{{ atributos.id_tag }}" class="id_tag">{{ atributos.id_tag }}</div>
 							<div id="palavra_{{ atributos.id_tag }}" class="palavra ">{{ atributos.word }}</div>
@@ -112,6 +121,28 @@
 								</div>
 							</div>
 						</div>
+					{% endfor %}
+				</div>
+				<div id="sentencas" class="sentencas">
+					{% for key,atributos in estatisticas_sentencas.items|sort %}
+					<div id="linha_sentenca">
+						<div id="titulo_linha" class="titulo_linha">Estatistica da Sentença {{ key }}</div>
+						<div id="conteudo_linha" class="conteudo_linha">
+							<ul class="list-inline">
+								<li class="list-inline-item">Total: <span id="total_sent_{{ key }}">{{ atributos.total }}</span></li>
+								<li class="list-inline-item">Palavras Comuns: <span id="totalPCo_sent_{{ key }}">{{ atributos.totalPCo }}</span></li>
+								<li class="list-inline-item">Palavras de Conteúdo: <span id="totalPCt_sent_{{ key }}">{{ atributos.totalPCt }}</span></li>
+							</ul>
+						</div>
+						<div id="titulo_linha" class="titulo_linha">Sentença</div>
+						<div id="conteudo_linha" class="conteudo_linha">
+							<ul id="itens_sentenca" class="itens_sentenca">
+								{% for item in atributos.itens %}
+									<li>{{ item }}</li>
+								{% endfor %}
+							</ul>
+						</div>
+					</div>
 					{% endfor %}
 				</div>
 			{% endif %}
@@ -236,10 +267,22 @@ $(document).ready(function(){
 				}
 				$("#total_valor").html(json['total']);
 				$("#totalProc_valor").html(json['totalProc']);
-				$("#tag_ignoradas_valor").html(json['tag_ignoradas']);
-				$("#total_ctw_valor").html(json['total_ctw']);
-				$("#total_cow_valor").html(json['total_cow']);
+				$("#totalIgn_valor").html(json['totalIgn']);
+				$("#totalPCt_valor").html(json['totalPCt']);
+				$("#totalPCo_valor").html(json['totalPCo']);
 				$("#totalNProc_valor").html(json['totalNProc']);
+				dicionario = '';
+				for (var key in json['tag_list_c']) {
+				  if (json['tag_list_c'].hasOwnProperty(key)) {
+					dicionario += "<li>" + json['tag_list_c'][key] + "</li>";
+				  }
+				}
+				$("#dicionario ul").html(dicionario);
+				for (var key in json['estatisticas_sentencas']) {
+				  if (json['estatisticas_sentencas'].hasOwnProperty(key)) {
+					$("#" + key).html(json['estatisticas_sentencas'][key]);
+				  }
+				}
 				$("#form_" + id_tag).html(' ');
 				$("#form_" + id_tag).removeClass('editando');
 				$(".tag_" + id_tag).css("display", "inline");

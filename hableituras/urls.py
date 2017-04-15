@@ -18,8 +18,8 @@ from django.contrib import admin
 from django.contrib.auth import views as auth_views
 
 urlpatterns = [
-    #url(r'^sentdesc/', include('sentdesc.urls', namespace='sentdesc')),
-	url(r'', include('sentdesc.urls', namespace='sentdesc')),
+	url(r'', include('core.urls', namespace='core')),
+    url(r'^sentdesc/', include('sentdesc.urls', namespace='sentdesc')),
 	url(r'^planoleituras/', include('planoleituras.urls', namespace='planoleituras')),
 	url(r'^admin/', admin.site.urls),
 	url(r'^accounts/login/$', auth_views.login, {'template_name': 'registration/login.html'}, name='login'),

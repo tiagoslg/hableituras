@@ -26,12 +26,13 @@ SECRET_KEY = 'kl_@z0h!$s5^b_e*p*u7ntsp_ihnn4+7ywn3&@t7-e0_dr1kyn'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['hosts_sistema']
+ALLOWED_HOSTS = ['localhost']
 
 
 # Application definition
 
 INSTALLED_APPS = [
+	'core.apps.CoreConfig',
 	'sentdesc.apps.SentdescConfig',
 	'planoleituras.apps.PlanoleiturasConfig',
 	'django.contrib.admin',
@@ -80,7 +81,7 @@ WSGI_APPLICATION = 'hableituras.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-	'NAME':  os.path.join(BASE_DIR, 'db.sqlite3'),
+		'NAME':  os.path.join(BASE_DIR, 'db.sqlite3'),
 		#'ENGINE': 'mysql.connector.django',
 		#'ENGINE': 'django.db.backends.mysql',
 		#'NAME':  '[nome_base]',

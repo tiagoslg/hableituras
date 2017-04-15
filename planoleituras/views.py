@@ -3,6 +3,7 @@ from django.http import HttpResponseRedirect, HttpResponse, JsonResponse
 import nltk, re
 from pickle import load
 from .models import Etiquetas, Textos, Dicionario, Sentencas
+from django.db.models import Count
 
 import json
 
@@ -11,13 +12,6 @@ import json
 def index(request):
 	if request.POST:
 		#processa o texto
-		counts = {}
-		counts['UNKN'] = 0
-		tag_ignoradas = 0
-		tag_list = {}
-		totalProc = 0
-		total_cow = 0
-		total_ctw = 0
 		texto_etiquetado = {}
 		etiquetas = Etiquetas.objects.all().order_by('etiqueta')
 		texto = request.POST['texto']
@@ -36,7 +30,6 @@ def index(request):
 			texto = remover_caracteres_especiais(texto)
 			tokens = nltk.word_tokenize(texto)
 			texto_tagged = tagger.tag(tokens)
-			print(texto_tagged)
 			tag_ignore = [',',':']
 			tag_msentenca = ['.','!','?','...']
 			sentenca = 1
@@ -49,18 +42,13 @@ def index(request):
 					if t != '+':
 						if t in tag_ignore:
 							t = 'IGN'
-							tag_ignoradas += 1
 						if tag in tag_msentenca:
 							t = 'PONT'
-							tag_ignoradas += 1
 						if t == 'Não Encontrado':
 							t = 'UNKN'
-							correto = False
-						if t not in counts:
-							counts[t] = 0 # does a exist in the current namespace
-						counts[t] += 1
-						if t != 'UNKN':
-							totalProc += 1
+							palavra_existe = Dicionario.objects.select_related('etiqueta').filter(palavra=word).exclude(etiqueta__etiqueta='UNKN')
+							if len(palavra_existe) > 0:
+								t = palavra_existe[0].etiqueta.etiqueta
 						etiqueta_f = etiquetas.filter(etiqueta=t)
 						dicionario = Dicionario(etiqueta = etiqueta_f[0], texto = texto_bd, palavra = word, correto = correto)
 						dicionario.save()
@@ -69,63 +57,44 @@ def index(request):
 							sentencas[sentenca] = itens_sentencas
 							itens_sentencas= []
 							sentenca += 1
-						if etiqueta_f[0].tipo_etiqueta != 'IGN':
-							if t not in tag_list:
-								tag_list[t] = etiqueta_f[0].descritor
-							if etiqueta_f[0].tipo_etiqueta == 'COW':
-								total_cow += 1
-							if etiqueta_f[0].tipo_etiqueta == 'CTW':
-								total_ctw += 1
 						texto_etiquetado[dicionario.id] = {'id_tag':dicionario.id, 
 							'word':word, 
 							'tag':etiqueta_f[0].etiqueta, 
 							'tag_desc':etiqueta_f[0].descritor,
 							'tipo_etiqueta':etiqueta_f[0].tipo_etiqueta}
-			total = len(texto_tagged)
 			estatisticas_sentencas = gravar_sentencas(texto_id, sentencas)
 		else:
 			texto_id = texto_bd.id
 			dicionario = Dicionario.objects.select_related('etiqueta').filter(texto=texto_id).order_by('id')
-			total = dicionario.count()
-			estatisticas_sentencas = get_estatisticas_sentenca(texto_id)
 			for item in dicionario:
+				if item.etiqueta.etiqueta == 'UNKN':
+					palavra_existe = Dicionario.objects.select_related('etiqueta').filter(palavra=item.palavra).exclude(etiqueta__etiqueta='UNKN')
+					if len(palavra_existe) > 0:
+						t = palavra_existe[0].etiqueta
+						item.etiqueta = t
+						item.save()
 				texto_etiquetado[item.id] = {'id_tag':item.id, 
 					'word':item.palavra, 
 					'tag':item.etiqueta.etiqueta,
 					'tag_desc':item.etiqueta.descritor,
 					'tipo_etiqueta':item.etiqueta.tipo_etiqueta}
-				if texto_etiquetado[item.id]['tag'] == 'PONT':
-					tag_ignoradas += 1
-					totalProc += 1
-				else:
-					if texto_etiquetado[item.id]['tag'] not in counts:
-						counts[texto_etiquetado[item.id]['tag']] = 0 # does a exist in the current namespace
-					counts[texto_etiquetado[item.id]['tag']] += 1
-					if texto_etiquetado[item.id]['tag'] != 'UNKN':
-						totalProc += 1
-					if texto_etiquetado[item.id]['tipo_etiqueta'] != 'IGN':
-						if texto_etiquetado[item.id]['tag'] not in tag_list:
-							tag_list[texto_etiquetado[item.id]['tag']] = texto_etiquetado[item.id]['tag_desc']
-						if texto_etiquetado[item.id]['tipo_etiqueta'] == 'COW':
-							total_cow += 1
-						if texto_etiquetado[item.id]['tipo_etiqueta'] == 'CTW':
-							total_ctw += 1
-		totalNProc = counts.pop('UNKN', 0)
-		counts = list(sorted(counts.items()))
+			estatisticas_sentencas = get_estatisticas_sentenca(texto_id)
 		print(estatisticas_sentencas)
-		context = {'error_message': 'Processando o Texto', 
-			'titulo': titulo,
-			'counts': dict(counts),
-			'total': total,
-			'totalProc': totalProc,
-			'totalNProc': totalNProc,
-			'total_cow': total_cow,
-			'total_ctw': total_ctw,
-			'tag_ignoradas': tag_ignoradas,
-			'tag_list': tag_list,
-			'etiquetas': get_etiquetas(),
-			'texto_etiquetado': texto_etiquetado,
-			'texto_id': texto_id,
+		tag_list_c = get_tag_list(texto_id)
+		estatisticas_texto = get_estatisticas_texto(texto_id)
+		context = {'error_message': 'Texto Processado com Sucesso', #mensagem de conclusão do processo 
+			'titulo': titulo, #Título do texto
+			'total': estatisticas_texto['total'], #total de itens analisados
+			'totalProc': estatisticas_texto['totalProc'], #total de itens taggeados
+			'totalNProc': estatisticas_texto['totalNProc'], #total de itens ignorados
+			'totalPCo': estatisticas_texto['totalPCo'], #total de palavras comuns
+			'totalPCt': estatisticas_texto['totalPCt'], #total de palavras de conteúdo
+			'totalIgn': estatisticas_texto['totalIgn'], #total de itens ignorados
+			'etiquetas': get_etiquetas(), #lista de etiquetas (tags) para o select de edição
+			'texto_etiquetado': texto_etiquetado, #texto completo com as tags
+			'texto_id': texto_id, #id do texto analisado, após gravação no BD
+			'tag_list_c': tag_list_c, #lista de tags e totais por tag para o dicionario de tags
+			'estatisticas_sentencas': estatisticas_sentencas, #estatisticas gerais das sentenças que compõem o texto
 		}
 	else:
 		#mostra o form normal
@@ -157,7 +126,7 @@ def atualizar(request, tag_id):
 			list_id = ''
 			etiqueta = get_object_or_404(Etiquetas, etiqueta=tag_nova)
 			if todas == '1':
-				dicionario = Dicionario.objects.select_related('etiqueta').filter(palavra=palavra).order_by('id')
+				dicionario = Dicionario.objects.select_related('etiqueta').filter(palavra=palavra).filter(texto=texto_id).order_by('id')
 				for item in dicionario:
 					item.etiqueta = etiqueta
 					item.correto = False
@@ -174,6 +143,8 @@ def atualizar(request, tag_id):
 			list_id = tag_id
 			context['error_message'] = 'Item não alterado'
 		estatisticas = get_estatisticas_texto(texto_id)
+		estatisticas_sentencas = get_estatisticas_sentenca(texto_id)
+		tag_list_c = get_tag_list(texto_id)
 		context['tag_id'] = tag_id
 		context['todas'] = todas
 		context['tag_nova'] = tag_nova
@@ -181,16 +152,24 @@ def atualizar(request, tag_id):
 		context['tag_id_alterado'] = list_id
 		context['total'] = estatisticas['total']
 		context['totalProc'] = estatisticas['totalProc']
-		context['tag_ignoradas'] = estatisticas['tag_ignoradas']
-		context['total_ctw'] = estatisticas['total_ctw']
-		context['total_cow'] = estatisticas['total_cow']
+		context['totalIgn'] = estatisticas['totalIgn']
+		context['totalPCt'] = estatisticas['totalPCt']
+		context['totalPCo'] = estatisticas['totalPCo']
 		context['totalNProc'] = estatisticas['totalNProc']
-		
+		context['tag_list_c'] = {}
+		x = 0
+		for descritor in sorted(tag_list_c):
+			context['tag_list_c'][x] = str(tag_list_c[descritor]['etiqueta']) + ' - ' + str(tag_list_c[descritor]['descritor']) + ' (' + str(tag_list_c[descritor]['total']) + ') '
+			x += 1
+		context['estatisticas_sentencas'] = {}
+		for item in sorted(estatisticas_sentencas):
+			context['estatisticas_sentencas']['total_sent_'+str(item)] = str(estatisticas_sentencas[item]['total'])
+			context['estatisticas_sentencas']['totalPCo_sent_'+str(item)] = str(estatisticas_sentencas[item]['totalPCo'])
+			context['estatisticas_sentencas']['totalPCt_sent_'+str(item)] = str(estatisticas_sentencas[item]['totalPCt'])
 		return HttpResponse(
 			json.dumps(context),
 			content_type="application/json"
 		)
-		#return HttpResponseRedirect(reverse('sentdesc:index'))
 
 def get_etiquetas():
 	etiquetas = Etiquetas.objects.all()
@@ -209,25 +188,41 @@ def remover_caracteres_especiais(text):
 		#text = text.replace('?.','?')
 		return text
 
+def select_or_none(model, *args, **kwargs):
+    try:
+        return model.objects.get(*args, **kwargs)
+    except model.DoesNotExist:
+        return None
+
 def get_or_none(model, *args, **kwargs):
     try:
         return model.objects.get(*args, **kwargs)
     except model.DoesNotExist:
         return None
 
+def get_tag_list(texto_id):
+	dicionario = Dicionario.objects.all().values('etiqueta__etiqueta', 'etiqueta__descritor').annotate(total=Count('palavra')).filter(texto=texto_id).exclude(etiqueta__etiqueta='UNKN').exclude(etiqueta__etiqueta='IGN').order_by('etiqueta__descritor')
+	tag_list = {}
+	for item in dicionario:
+		tag_list[item['etiqueta__descritor']] = {}
+		tag_list[item['etiqueta__descritor']]['etiqueta'] = item['etiqueta__etiqueta']
+		tag_list[item['etiqueta__descritor']]['descritor'] = item['etiqueta__descritor']
+		tag_list[item['etiqueta__descritor']]['total'] = item['total']
+	return tag_list
+
 def get_estatisticas_texto(texto_id):
-	texto = get_object_or_404(Textos, pk=texto_id)
+	#texto = get_object_or_404(Textos, pk=texto_id)
 	dicionario = Dicionario.objects.select_related('etiqueta').filter(texto=texto_id).order_by('id')
 	estatisticas = {}
 	estatisticas['total'] = str(len(dicionario))
 	filtro = dicionario.exclude(etiqueta__etiqueta='UNKN')
 	estatisticas['totalProc'] = str(len(filtro))
-	filtro = dicionario.filter(etiqueta__etiqueta='PONT').filter(etiqueta__etiqueta='MSE')
-	estatisticas['tag_ignoradas'] = str(len(filtro))
+	filtro = dicionario.filter(etiqueta__tipo_etiqueta='IGN').exclude(etiqueta__etiqueta='UNKN')
+	estatisticas['totalIgn'] = str(len(filtro))
 	filtro = dicionario.filter(etiqueta__tipo_etiqueta='CTW')
-	estatisticas['total_ctw'] = str(len(filtro))
+	estatisticas['totalPCt'] = str(len(filtro))
 	filtro = dicionario.filter(etiqueta__tipo_etiqueta='COW')
-	estatisticas['total_cow'] = str(len(filtro))
+	estatisticas['totalPCo'] = str(len(filtro))
 	totalNProc = str(int(estatisticas['total']) - int(estatisticas['totalProc']))
 	estatisticas['totalNProc'] = totalNProc
 	return estatisticas
@@ -257,9 +252,9 @@ def get_estatisticas_sentenca(texto_id):
 		estatisticas[sentenca.ordem] = {}
 		estatisticas[sentenca.ordem]['total'] = str(len(dicionario))
 		filtro = dicionario.filter(etiqueta__tipo_etiqueta='CTW')
-		estatisticas[sentenca.ordem]['total_ctw'] = str(len(filtro))
+		estatisticas[sentenca.ordem]['totalPCt'] = str(len(filtro))
 		filtro = dicionario.filter(etiqueta__tipo_etiqueta='COW')
-		estatisticas[sentenca.ordem]['total_cow'] = str(len(filtro))
+		estatisticas[sentenca.ordem]['totalPCo'] = str(len(filtro))
 		estatisticas[sentenca.ordem]['itens'] = []
 		for item in dicionario:
 			estatisticas[sentenca.ordem]['itens'].append(item.palavra)
